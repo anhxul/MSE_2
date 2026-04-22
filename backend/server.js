@@ -22,8 +22,8 @@ app.use('/api', authRoutes);
 // ✅ Static serve AFTER API
 app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-// ✅ React routing
-app.get("*", (req, res) => {
+// ✅ React routing FIX (Express v5 compatible)
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
