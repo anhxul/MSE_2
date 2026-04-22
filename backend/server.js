@@ -4,27 +4,30 @@ const cors = require('cors');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
+const dns = require('dns').promises;
+const path = require("path");
 
 const app = express();
 
-const dns = require('dns').promises;   // or just require('dns') in older Node
-dns.setServers(['8.8.8.8', '1.1.1.1']);   // to fix DNS refused block error
+// DNS fix
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
-
-
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Middleware
+app.use(cors());
 app.use(express.json());
 
+// ✅ API routes FIRST
 app.use('/api', authRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'Student Auth API is running!' });
+// ✅ Static serve AFTER API
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+// ✅ React routing
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
 
+// MongoDB connect
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('✅ MongoDB Connected Successfully');
